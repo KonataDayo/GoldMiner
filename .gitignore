@@ -1,0 +1,2 @@
+# 开发期语法校验临时目录（node --check 用，用完即删）
+.tmpcheck/

@@ -1,6 +1,6 @@
 // main.js — 入口：创建游戏共享状态 + 界面 + 游戏循环。
 // 每帧顺序：输入事件队列 → screen.update → screen.render
-import { CANVAS } from './config.js';
+import { CANVAS, THEME } from './config.js';
 import { ACTIVE_DIFFICULTY } from './config_level.js';
 import { Input } from './input.js';
 import { Miner } from './miner.js';
@@ -14,11 +14,33 @@ import { Buffs } from './buffs.js';
 import { preloadAssets } from './render.js';
 
 const canvas = document.getElementById('game-canvas');
-canvas.width = CANVAS.width;
-canvas.height = CANVAS.height;
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = true;
 ctx.imageSmoothingQuality = 'high'; // 贴图都是透明 PNG：大图缩小时边缘更干净（混合仍走默认 source-over）
+
+// ———— 多分辨率适配：逻辑坐标固定 800×600，画布按屏幕等比缩放 + DPR 锐化 ————
+// 游戏内所有坐标（生成/按钮/绘制）保持逻辑坐标不动，绘制前 setTransform 统一映射；
+// 输入坐标在 input.js 按同样比例反向映射回逻辑坐标。
+let renderScale = 1;
+
+function fitCanvas() {
+  const fit = Math.min(window.innerWidth / CANVAS.width, window.innerHeight / CANVAS.height);
+  if (fit <= 0) return;
+  const cssW = Math.round(CANVAS.width * fit);
+  const cssH = Math.round(CANVAS.height * fit);
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = Math.round(cssW * dpr); // 后备缓冲按物理像素：高分屏/手机上文字与贴图不发虚
+  canvas.height = Math.round(cssH * dpr);
+  canvas.style.width = cssW + 'px';
+  canvas.style.height = cssH + 'px';
+  renderScale = canvas.width / CANVAS.width;
+}
+fitCanvas();
+window.addEventListener('resize', fitCanvas);
+
+// 画布外的留白区域与天空同色（THEME 驱动：换主题自动跟上）
+document.body.style.background = THEME.sky.top;
+
 const input = new Input(canvas);
 
 // ———— 存档/背包/商店：按依赖顺序 save → backpack → shop（页面打开即建，理由见决策记录） ————
@@ -54,6 +76,7 @@ function loop(now) {
   const dt = Math.min((now - last) / 1000, 0.05); // 钳制 dt，切后台回来不跳帧
   last = now;
   const events = input.poll();
+  ctx.setTransform(renderScale, 0, 0, renderScale, 0, 0); // 每帧重设：逻辑坐标 → 物理像素
   screens.update(dt, events);
   screens.render();
   requestAnimationFrame(loop);

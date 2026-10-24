@@ -2,6 +2,7 @@
 // 状态机不直接监听事件，而是每帧从队列里消费（输入与逻辑解耦）。
 // 鼠标点击事件携带画布坐标（x/y），供界面按钮命中检测；
 // 键盘事件没有坐标，界面层据此区分"按钮点击"与"玩法输入"。
+import { CANVAS } from './config.js';
 export class Input {
   constructor(canvas) {
     this.canvas = canvas;
@@ -22,12 +23,12 @@ export class Input {
 
     this.canvas.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return;
-      // 画布坐标（当前 CSS 不缩放画布，1:1；日后若加 CSS 缩放需除以缩放系数）
+      // CSS 尺寸 ≠ 逻辑尺寸（main.js 等比缩放 + DPR 锐化）：把 CSS 坐标反算回 800×600 逻辑坐标
       const rect = this.canvas.getBoundingClientRect();
       this.queue.push({
         type: 'fire',
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
+        x: ((e.clientX - rect.left) * CANVAS.width) / rect.width,
+        y: ((e.clientY - rect.top) * CANVAS.height) / rect.height,
       });
     });
   }

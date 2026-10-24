@@ -51,26 +51,26 @@ export function getDifficulty(tag = ACTIVE_DIFFICULTY) {
 export const OBJ_TYPES = {
   goldSmall: {
     label: '小金块', value: 50, weight: 1.6, r: 14,
-    ratio: 0.22, spawnRate: 0.9, sprite: 'small_gold.png', color: '#f9c74f',
+    ratio: 0.22, spawnRate: 0.9, sprite: '', color: '#f9c74f',
   },
   goldBig: {
     label: '大金块', value: 200, weight: 3.2, r: 26,
-    ratio: 0.1, spawnRate: 0.7, sprite: 'large_gold.png', color: '#f4a300',
+    ratio: 0.1, spawnRate: 0.7, sprite: '', color: '#f4a300',
   },
   diamond: {
     label: '钻石', value: 300, weight: 0.8, r: 11,
-    ratio: 0.06, spawnRate: 0.5, sprite: 'diamond.png', color: '#5bc0eb',
+    ratio: 0.06, spawnRate: 0.5, sprite: '', color: '#5bc0eb',
   },
   stoneSmall: {
     label: '小石头', value: 20, weight: 2.2, r: 15,
-    ratio: 0.27, spawnRate: 0.9, sprite: 'small_stone.png', color: '#8d99ae',
+    ratio: 0.27, spawnRate: 0.9, sprite: '', color: '#8d99ae',
   },
   stoneBig: {
     label: '大石头', value: 50, weight: 4.5, r: 28,
-    ratio: 0.15, spawnRate: 0.75, sprite: 'large_stone.png', color: '#6c757d',
+    ratio: 0.15, spawnRate: 0.75, sprite: '', color: '#6c757d',
   },
   bag: {
     label: '神秘袋', value: 100, weight: 2.0, r: 16,
-    ratio: 0.2, spawnRate: 0.8, sprite: 'mystery_bag.png', color: '#a98274',
+    ratio: 0.2, spawnRate: 0.8, sprite: '', color: '#a98274',
   },
 };

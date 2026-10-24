@@ -37,6 +37,7 @@
 30. 抓取物贴图接入：OBJ_TYPES 每行 sprite 声明 assets/ 文件名（与矿工/钩子同思路）；绘制走 drawEntity 通用贴图分支，多类型可复用同一张图（imgCache 按路径缓存，只加载一次）；加载失败回退矢量占位
 31. 资源预载 barrier（非阻塞）：启动即预载全部贴图（数据驱动收集 MINER_LOOK/OBJ_TYPES/SHOP_ITEMS 路径）；进游戏未就绪则 PlayingScreen 显示 Loading 占位动画（纯矢量），就绪后重建本局；onerror 放行回退矢量占位 + 10s 超时保险，永不卡死；再来一局/商店返回不重载
 32. 公网部署：GitHub Pages 静态托管，任何人有链接即可游玩；SESSION_LOG.md 一并上传公开；部署前无需代码改动（相对路径 + 纯静态，存档仍在玩家本地浏览器）
+33. 多设备分辨率适配：逻辑分辨率固定 800×600（生成/按钮/绘制零改动），画布按窗口等比缩放 + devicePixelRatio 锐化（高分屏/手机不发虚），输入坐标按缩放反向映射回逻辑坐标；留白区域与天空同色；手机触屏可玩（点击 = 发射）
 
 ## 二、可行性分析结论（2026-10-22）
 
@@ -224,6 +225,7 @@ D:\GoldMiner\
 | 2026-10-24 | 抓取物贴图接入：OBJ_TYPES 每行 sprite 声明路径（配置驱动，与矿工/钩子同思路）；绘制走 drawEntity 通用贴图分支（任何类型声明即生效），imgCache 按路径缓存 → 多类型可复用同一张图只加载一次；加载失败/未完成回退矢量占位 | ✅ 已定 |
 | 2026-10-24 | 资源预载方案 A：Loading 阶段内嵌 PlayingScreen（非阻塞，rAF 照跑，只阻塞「进游戏」不阻塞玩家）；启动即预载（菜单浏览时间 = 加载时间）；路径数据驱动收集（三处 config 自动遍历去重）；onerror 放行回退矢量占位 + 10s 超时兜底 | ✅ 已定 |
 | 2026-10-24 | 部署路线：GitHub Pages 静态托管（用户自建仓库，SESSION_LOG.md 一并公开上传）；部署前零代码改动（纯静态 + 相对路径）；存档留在玩家本地浏览器，排行榜/云同步属未来后端需求 | ✅ 已定 |
+| 2026-10-24 | 分辨率适配：逻辑坐标 800×600 不动 + 画布等比缩放（fit 取 min，不拉伸变形）+ DPR 后备缓冲 + 每帧 setTransform 统一映射；输入按 rect 反算逻辑坐标；页面留白与 THEME.sky.top 同色；canvas touch-action:none 保证手机点击直命中 | ✅ 已定 |
 
 ## 七、开发进度
 
@@ -386,12 +388,30 @@ D:\GoldMiner\
 24. 场上 6 类抓取物显示对应贴图（小金块/大金块/钻石/小石头/大石头/神秘袋），尺寸随碰撞半径（显示直径 = r×2.6）
 25. 复用/回退：把 OBJ_TYPES 某一行 sprite 清空 → 仅该类型回退矢量占位，其余类型与矿工/钩子贴图不受影响（imgCache 按路径缓存，同一张图多类型共用只加载一次）
 26. 资源加载：硬刷新页面后立刻点「开始游戏」进游戏 → 短暂 Loading（动画点 + n/m 进度条）后进游戏，首帧即贴图版（无矢量占位闪烁）；在菜单停留几秒再进 → 直接进游戏无 Loading；删除 assets/ 某张图再刷新 → Loading 正常结束、该实体回退矢量占位、游戏可玩；再来一局与从商店/背包返回不出现 Loading
+27. 线上部署：浏览器打开 https://konatadayo.github.io/GoldMiner/ → 主菜单 → 开始游戏完整可玩；换一台设备（或手机浏览器）同样可玩；存档在各自浏览器本地，设备之间互不影响
+28. 分辨率适配：桌面拖拽窗口大小 → 画布等比缩放无拉伸、留白与天空同色、按钮/发射点击位置准确；手机浏览器竖屏/横屏 → 完整显示、点击发射与按钮都命中正确；高分屏（系统缩放 125%/150%）下文字贴图清晰不发虚
 
 贴图接入方式（素材到位后）：把图片放进 `assets/`，在对应 config 的 `src` 填文件名即可——角色外观 [config.js](js/config.js)、抓取物 [config_level.js](js/config_level.js)、商品 [config_shop.js](js/config_shop.js)。
 
-### 7.16 下一步（待定优先级）
+### 7.16 第十五轮：GitHub Pages 部署上线（已完成）
 
-- 部署上线 GitHub Pages（等用户创建仓库后：git init → commit → push → Settings 开启 Pages）
+- **仓库与推送**：用户自行完成 git init → commit → push（D:\GoldMiner 成为 git 仓库，main 分支完整推送到 https://github.com/KonataDayo/GoldMiner）
+- **开启 Pages**：用已认证的 gh CLI（KonataDayo）调 GitHub API 开启 Pages——legacy 构建、main 分支根目录、public、HTTPS 强制
+- **站点上线**：https://konatadayo.github.io/GoldMiner/ ——首次构建完成后实测 HTTP 200 且页面含 game-canvas（确认线上跑的是本游戏）
+- **维护方式**：以后更新 = git push，1–2 分钟自动生效；新增 [.gitignore](.gitignore)（挡住 .tmpcheck/ 校验临时目录，随下次提交推送）
+- 存档仍在玩家各自浏览器的 localStorage（跨设备存档/排行榜属未来后端需求）
+
+### 7.17 第十六轮：多设备分辨率适配（已完成）
+
+- **适配策略**：游戏逻辑分辨率固定 800×600——生成/按钮/绘制全部保持逻辑坐标零改动；[main.js](js/main.js) 新增 `fitCanvas()`：按窗口宽高取 min 等比缩放（不拉伸变形），后备缓冲乘 `devicePixelRatio`（高分屏/手机上文字与贴图不发虚），window resize（含手机横竖屏）自动重算
+- **绘制映射**：主循环每帧 `ctx.setTransform(renderScale…)` 把逻辑坐标统一映射到物理像素，[render.js](js/render.js) 全部零改动
+- **输入反算**：[input.js](js/input.js) mousedown 按 `getBoundingClientRect` 把 CSS 坐标反算回 800×600 逻辑坐标——按钮命中检测、点击发射都与缩放无关
+- **页面收尾**：画布外留白运行时设为 `THEME.sky.top` 同色（主题变了自动跟上）；[style.css](css/style.css) canvas 加 `touch-action:none` / `user-select:none` / 去点击高亮，手机上手势不滚动页面、点击直命中
+- **手机可用性**：触屏点击 = 发射（mousedown 兼容事件）；道具走「背包 → 使用」按钮（快捷键 1/2/3 仅键盘，手机有按钮等价入口）；横竖屏切换 resize 自动适配
+- Node 语法校验通过（17 个文件）
+
+### 7.18 下一步（待定优先级）
+
 - 特效系统（方案已提交审核：A 轻量粒子数组 / B 按需动画函数 / C 序列帧贴图；审核通过后实现爆炸粒子、入账金光、过关彩带）
 - 素材收尾：商品图标 3 张待生成后填 [config_shop.js](js/config_shop.js)（抓取物 6 张已于第十三轮接入）
 - 手感调优（先试玩，再调 config_gameplay.js / config_level.js，重点：三档难度下 valueDistanceBias/sizeScale 的实际感受）
