@@ -1,0 +1,21 @@
+/* 页面样式：居中画布，深色背景 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #101418;
+  overflow: hidden;
+}
+
+#game-canvas {
+  background: #0f2027;
+  border-radius: 8px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
+}
