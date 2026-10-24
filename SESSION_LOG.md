@@ -409,6 +409,7 @@ D:\GoldMiner\
 - **页面收尾**：画布外留白运行时设为 `THEME.sky.top` 同色（主题变了自动跟上）；[style.css](css/style.css) canvas 加 `touch-action:none` / `user-select:none` / 去点击高亮，手机上手势不滚动页面、点击直命中
 - **手机可用性**：触屏点击 = 发射（mousedown 兼容事件）；道具走「背包 → 使用」按钮（快捷键 1/2/3 仅键盘，手机有按钮等价入口）；横竖屏切换 resize 自动适配
 - Node 语法校验通过（17 个文件）
+- 补充 [README.md](README.md)（仓库主页说明：简介/在线地址/操作/特性/本地运行/项目结构/部署/开发记录链接）
 
 ### 7.18 下一步（待定优先级）
 
